@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Mar 11 09:24:00 2017
-
+Python 3.6.0
 @author: Julio
 """
 
@@ -9,7 +9,7 @@ import numpy as np
 import scipy.io.wavfile as wav
 import math
 
-
+np.random.seed(1212)
 
 def audio_stuffing(audio1_path, size_sec, dest_path):
     [frame_rate, a1_data] = wav.read(audio1_path)      
