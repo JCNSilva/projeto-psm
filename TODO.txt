@@ -1,0 +1,2 @@
+-Selecionar 20% das frequências de maior importância de cada audio
+-Comparar as frequencias da voz com as frequências selecionadas e classificar cada janela como voz ou não
