@@ -2,22 +2,21 @@
 """
 Created on Sat Mar 25 09:50:32 2017
 Python 3.6.0
-@author: Julio
+@author: Julio and Gleyser
 """
 
 import scipy.io.wavfile as wav
 import scipy.fftpack as transf
 import math
 
-#Calculates FFT of windows
+# Calculates FFT of windows
 def windowed_fft(audio_path, w_size, sl_rate):
     [frame_rate, data] = wav.read(audio_path)
-    
     fftwindows = list(list())
     
-    for w_start in range(0, len(data) - frame_rate*w_size, math.floor(frame_rate*sl_rate)):
-        window = data[w_start:w_start+frame_rate*w_size]         
-        fftwindows.append(transf.fft(window))
+    for w_start in range(0, len(data) - frame_rate*w_size, int(math.floor(frame_rate*sl_rate))):
+		window = data[w_start:w_start+frame_rate*w_size]
+		fftwindows.append(transf.fft(window))
         
     return fftwindows
 
@@ -30,8 +29,7 @@ def windowed_fft(audio_path, w_size, sl_rate):
 files_windows = list(list())
 for i in range(20):
     file_number = '%02d' % (i+1)
-    file_windows = windowed_fft('output/speech-noise/vf12-' + file_number + '.wav', 2, 0.2)
-    
+    file_windows = windowed_fft('output/speech-noise/vf12-' + file_number + '.wav', 2, 0.2)    
     files_windows.append(file_windows)
     print(i+1)
     
