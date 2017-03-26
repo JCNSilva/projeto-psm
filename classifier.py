@@ -33,7 +33,7 @@ for i in range(20):
     file_number = '%02d' % (i+1)
     file_windows = windowed_fft('output/speech-noise/vf12-' + file_number + '.wav', 2, 0.2)    
     dicionario[i+1] = file_windows
-    break
+    
     #files_windows.append(file_windows)
 
     
@@ -44,10 +44,10 @@ for i in range(20):
 	window = element[0]
 	# tenho todos os valores de amplitude de todos os segmentos da janela 0
 	lista = np.abs(window)
-	listaOrd = lista.sort()
+	listaOrd = np.sort(lista)
 	par1 = len(listaOrd)
 	par2 = len(listaOrd)-1
-	listaSel = listaOrd[par2 - par1 * 0.2 :par2] 
+	listaSel = listaOrd[par2 - par1 * 0.2 : par2] 
 	print listaSel
 	
 	break 
