@@ -37,9 +37,9 @@ files_windows = list(list())
 arquivos = {}
 for i in range(20):
     file_number = '%02d' % (i+1)
-    file_windows = windowed_fft('output/speech-silence/vf12-' + file_number + '.wav', 2, 0.2)    
+    file_windows = windowed_fft('output/speech-noise/vf12-' + file_number + '.wav', 2, 0.2)    
     arquivos[i+1] = file_windows
-    print(i+1)
+    #print(i+1)
     
     #files_windows.append(file_windows)
 
@@ -54,16 +54,22 @@ for i in range(20):
         n_components = len(window)
         # calculamos a magnitude dos valores da janela
         mag = np.abs(window)
+        # print mag
         # pega o indice das 25 frequencias de maior amplitude
-        mag_order = np.argsort(mag)[:25]
+        mag_order = np.argsort(mag)[:100]
         # descobre quais foram as 25 frequencias de maior amplitude
         # (index / num_components) * (fs/2)
-        mag_order = np.add(mag_order, 1)
-        main_frequencies = np.multiply(np.divide(mag_order, n_components), float(48000) / 2)
+        mag_order = np.add(mag_order, 1.0)
+        teste = np.divide(mag_order, n_components)
+        # print teste      
+        main_frequencies = np.multiply(teste, float(48000) / 2)
+        # print main_frequencies
     
-        #TODO: Melhorar isso aqui
-        #Verifica se 15 dessas 25 frequencias estão no espectro da voz
+        # TODO: Melhorar isso aqui
+        # Verifica se 15 dessas 25 frequencias estão no espectro da voz
         frequencias_voz = [x for x in main_frequencies if x >= 50 and x <= 3400]
+        # print frequencias_voz
+        # print len(frequencias_voz)
         #Classifica a janela
         if len(frequencias_voz) >= 15:
             print('Voz! Na janela', count, 'do arquivo', i+1)
