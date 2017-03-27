@@ -11,12 +11,18 @@ import numpy as np
 import math
 
 # Calculates FFT of windows
+# w_size: Window size
+# sl_rate: Sliding rate
 def windowed_fft(audio_path, w_size, sl_rate):
-    [frame_rate, data] = wav.read(audio_path)
+    [sample_rate, data] = wav.read(audio_path)
     fftwindows = list(list())    
-    for w_start in range(0, len(data) - frame_rate*w_size, int(math.floor(frame_rate*sl_rate))):
-		window = data[w_start:w_start+frame_rate*w_size]
-		fftwindows.append(transf.fft(window))      
+    for w_start in range(0, len(data) - sample_rate*w_size, int(math.floor(sample_rate*sl_rate))):
+        window = data[w_start:w_start+sample_rate*w_size]
+        # precisamos apenas da metade direita dos valores da FFT, 
+        # a outra metade é apenas o espelho da primeira
+        fftwindow = transf.fft(window)
+        fftwindow = fftwindow[:len(window)//2] 
+        fftwindows.append(fftwindow)      
     return fftwindows
 
 # Calculates Windowed FFT for all audio files
@@ -28,29 +34,42 @@ def windowed_fft(audio_path, w_size, sl_rate):
 files_windows = list(list())
 
 # cada elemento do dicionario tem a FFT de todas as janelas do arquivo passado como chave para o dicionario
-dicionario = {}
+arquivos = {}
 for i in range(20):
     file_number = '%02d' % (i+1)
-    file_windows = windowed_fft('output/speech-noise/vf12-' + file_number + '.wav', 2, 0.2)    
-    dicionario[i+1] = file_windows
+    file_windows = windowed_fft('output/speech-silence/vf12-' + file_number + '.wav', 2, 0.2)    
+    arquivos[i+1] = file_windows
+    print(i+1)
     
     #files_windows.append(file_windows)
 
     
 for i in range(20):
-	# element eh um array que tem a FFT de todas as janelas do arquivo
-	element = dicionario[i+1]	
-	# os valores da FFT de todos os segmentos da janela 0
-	window = element[0]
-	# tenho todos os valores de amplitude de todos os segmentos da janela 0
-	lista = np.abs(window)
-	listaOrd = np.sort(lista)
-	par1 = len(listaOrd)
-	par2 = len(listaOrd)-1
-	listaSel = listaOrd[par2 - par1 * 0.2 : par2] 
-	print listaSel
+    # element eh um array que tem a FFT de todas as janelas do arquivo
+    arquivo = arquivos[i+1]	
+    # os valores da FFT das janelas
+    count = 0
+    for window in arquivo:
+        #window = element[0]
+        n_components = len(window)
+        # calculamos a magnitude dos valores da janela
+        mag = np.abs(window)
+        # pega o indice das 25 frequencias de maior amplitude
+        mag_order = np.argsort(mag)[:25]
+        # descobre quais foram as 25 frequencias de maior amplitude
+        # (index / num_components) * (fs/2)
+        mag_order = np.add(mag_order, 1)
+        main_frequencies = np.multiply(np.divide(mag_order, n_components), float(48000) / 2)
+    
+        #TODO: Melhorar isso aqui
+        #Verifica se 15 dessas 25 frequencias estão no espectro da voz
+        frequencias_voz = [x for x in main_frequencies if x >= 50 and x <= 3400]
+        #Classifica a janela
+        if len(frequencias_voz) >= 15:
+            print('Voz! Na janela', count, 'do arquivo', i+1)
+        count+=1
 	
-	break 
+     
 	
     
     
