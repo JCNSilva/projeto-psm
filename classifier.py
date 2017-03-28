@@ -35,47 +35,53 @@ files_windows = list(list())
 
 # cada elemento do dicionario tem a FFT de todas as janelas do arquivo passado como chave para o dicionario
 arquivos = {}
+nomes = {}
 for i in range(20):
     file_number = '%02d' % (i+1)
-    file_windows = windowed_fft('output/speech-noise/vf12-' + file_number + '.wav', 2, 0.2)    
+    file_windows = windowed_fft('output/speech-silence/vf12-' + file_number + '.wav', 2, 0.2)    
     arquivos[i+1] = file_windows
-    #print(i+1)
-    
+    nomes[i+1] = 'vf12-' + str(file_number)
+    print(i+1)
     #files_windows.append(file_windows)
 
-    
+result = {}    
 for i in range(20):
     # element eh um array que tem a FFT de todas as janelas do arquivo
-    arquivo = arquivos[i+1]	
+    arquivo = arquivos[i+1] 
     # os valores da FFT das janelas
     count = 0
+    segs = 0
+    result[i+1] = []
     for window in arquivo:
         #window = element[0]
         n_components = len(window)
         # calculamos a magnitude dos valores da janela
         mag = np.abs(window)
-        # print mag
         # pega o indice das 25 frequencias de maior amplitude
-        mag_order = np.argsort(mag)[:100]
+        mag_order = np.argsort(mag)[-25:]
         # descobre quais foram as 25 frequencias de maior amplitude
         # (index / num_components) * (fs/2)
         mag_order = np.add(mag_order, 1.0)
-        teste = np.divide(mag_order, n_components)
-        # print teste      
-        main_frequencies = np.multiply(teste, float(48000) / 2)
-        # print main_frequencies
-    
-        # TODO: Melhorar isso aqui
-        # Verifica se 15 dessas 25 frequencias estão no espectro da voz
-        frequencias_voz = [x for x in main_frequencies if x >= 50 and x <= 3400]
-        # print frequencias_voz
-        # print len(frequencias_voz)
+        main_frequencies = np.multiply(np.divide(mag_order, n_components), float(48000) / 2)
+        
+        #TODO: Melhorar isso aqui
+        #Verifica se 15 dessas 25 frequencias estão no espectro da voz
+        frequencias_voz = [x for x in main_frequencies if x >= 65 and x <= 285]
         #Classifica a janela
         if len(frequencias_voz) >= 15:
-            print('Voz! Na janela', count, 'do arquivo', i+1)
+            print('Voz! Na janela', count, 'do arquivo', i+1, '. Segundos:', segs , '-', segs+2)
+            result[i+1].append(segs)
+            result[i+1].append(segs+2)
         count+=1
+        segs += 0.2
+
+for j in range(20):
 	
+	if len(result[j+1]) > 1:		
+		inicio = result[j+1][0] + 1
+		fim = result[j+1][-1] - 1
+		print "arquivo " + nomes[j+1] + " inicio da voz: " + str(inicio)
+		print "arquivo " + nomes[j+1] + " final da voz: " + str(fim)
+		#print "----"
      
 	
-    
-    
