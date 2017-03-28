@@ -34,54 +34,98 @@ def windowed_fft(audio_path, w_size, sl_rate):
 files_windows = list(list())
 
 # cada elemento do dicionario tem a FFT de todas as janelas do arquivo passado como chave para o dicionario
+def experimento():
+	arquivos = {}
+	nomes = {}
+	for i in range(20):
+		file_number = '%02d' % (i+1)
+		file_windows = windowed_fft('output/speech-noise/vf12-' + file_number + '.wav', 2, 0.2)    
+		arquivos[i+1] = file_windows
+		nomes[i+1] = 'vf12-' + str(file_number)
+		# print(i+1)
+		#files_windows.append(file_windows)
+
+	result = {}    
+	for i in range(20):
+		# element eh um array que tem a FFT de todas as janelas do arquivo
+		arquivo = arquivos[i+1] 
+		# os valores da FFT das janelas
+		count = 0
+		segs = 0
+		result[i+1] = []
+		for window in arquivo:
+			#window = element[0]
+			n_components = len(window)
+			# calculamos a magnitude dos valores da janela
+			mag = np.abs(window)
+			# pega o indice das 25 frequencias de maior amplitude
+			mag_order = np.argsort(mag)[-25:]
+			# descobre quais foram as 25 frequencias de maior amplitude
+			# (index / num_components) * (fs/2)
+			mag_order = np.add(mag_order, 1.0)
+			main_frequencies = np.multiply(np.divide(mag_order, n_components), float(48000) / 2)
+			
+			#TODO: Melhorar isso aqui
+			#Verifica se 15 dessas 25 frequencias estão no espectro da voz
+			frequencias_voz = [x for x in main_frequencies if x >= 65 and x <= 285]
+			#Classifica a janela
+			if len(frequencias_voz) >= 15:
+				#print('Voz! Na janela', count, 'do arquivo', i+1, '. Segundos:', segs , '-', segs+2)
+				result[i+1].append(segs)
+				result[i+1].append(segs+2)
+			count+=1
+			segs += 0.2
+
+	for j in range(20):
+		
+		if len(result[j+1]) > 1:		
+			inicio = result[j+1][0] + 1
+			fim = result[j+1][-1] - 1
+			print "No arquivo " + nomes[j+1] + " o inicio da voz: " + str(inicio)
+			print "No arquivo " + nomes[j+1] + " o final da voz: " + str(fim)
+			print "----"
+			
+print "=== Projeto de Processamento de Sinais Multimidia - Classificador de Voz ==="
+print "Digite 1 para rodar os experimentos e 2 para inserir o nome de um arquivo especifico"
+entrada = int(raw_input())
 arquivos = {}
 nomes = {}
-for i in range(20):
-    file_number = '%02d' % (i+1)
-    file_windows = windowed_fft('output/speech-silence/vf12-' + file_number + '.wav', 2, 0.2)    
-    arquivos[i+1] = file_windows
-    nomes[i+1] = 'vf12-' + str(file_number)
-    print(i+1)
-    #files_windows.append(file_windows)
+count = 0
+segs = 0
 
-result = {}    
-for i in range(20):
-    # element eh um array que tem a FFT de todas as janelas do arquivo
-    arquivo = arquivos[i+1] 
-    # os valores da FFT das janelas
-    count = 0
-    segs = 0
-    result[i+1] = []
-    for window in arquivo:
-        #window = element[0]
-        n_components = len(window)
-        # calculamos a magnitude dos valores da janela
-        mag = np.abs(window)
-        # pega o indice das 25 frequencias de maior amplitude
-        mag_order = np.argsort(mag)[-25:]
-        # descobre quais foram as 25 frequencias de maior amplitude
-        # (index / num_components) * (fs/2)
-        mag_order = np.add(mag_order, 1.0)
-        main_frequencies = np.multiply(np.divide(mag_order, n_components), float(48000) / 2)
-        
-        #TODO: Melhorar isso aqui
-        #Verifica se 15 dessas 25 frequencias estão no espectro da voz
-        frequencias_voz = [x for x in main_frequencies if x >= 65 and x <= 285]
-        #Classifica a janela
-        if len(frequencias_voz) >= 15:
-            print('Voz! Na janela', count, 'do arquivo', i+1, '. Segundos:', segs , '-', segs+2)
-            result[i+1].append(segs)
-            result[i+1].append(segs+2)
-        count+=1
-        segs += 0.2
-
-for j in range(20):
-	
-	if len(result[j+1]) > 1:		
-		inicio = result[j+1][0] + 1
-		fim = result[j+1][-1] - 1
-		print "arquivo " + nomes[j+1] + " inicio da voz: " + str(inicio)
-		print "arquivo " + nomes[j+1] + " final da voz: " + str(fim)
-		#print "----"
-     
-	
+if entrada == 1:
+	experimento()
+elif entrada == 2:
+	entrada = raw_input("Digite o nome do arquivo na pasta do projeto: ")
+	result = {}
+	result[entrada] = [] 
+	file_windows = windowed_fft('output/entrada/' + entrada + '.wav', 2, 0.2)    
+	arquivos[entrada] = file_windows
+	arquivo = arquivos[entrada]  
+	for window in arquivo:
+		#window = element[0]
+		n_components = len(window)
+		# calculamos a magnitude dos valores da janela
+		mag = np.abs(window)
+		# pega o indice das 25 frequencias de maior amplitude
+		mag_order = np.argsort(mag)[-25:]
+		# descobre quais foram as 25 frequencias de maior amplitude
+		# (index / num_components) * (fs/2)
+		mag_order = np.add(mag_order, 1.0)
+		main_frequencies = np.multiply(np.divide(mag_order, n_components), float(48000) / 2)
+			
+		#TODO: Melhorar isso aqui
+		#Verifica se 15 dessas 25 frequencias estão no espectro da voz
+		frequencias_voz = [x for x in main_frequencies if x >= 65 and x <= 285]
+		#Classifica a janela
+		if len(frequencias_voz) >= 15:
+			# print('Voz! Na janela', count, 'do arquivo', entrada, '. Segundos:', segs , '-', segs+2)
+			result[entrada].append(segs)
+			result[entrada].append(segs+2)
+		count+=1
+		segs += 0.2
+	inicio = result[entrada][0] + 1
+	fim = result[entrada][-1] - 1
+	print "No arquivo " + entrada + " o inicio da voz: " + str(inicio)
+	print "No arquivo " + entrada + " o final da voz: " + str(fim)
+	print "----"
