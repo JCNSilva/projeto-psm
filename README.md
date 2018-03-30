@@ -1,3 +1,4 @@
-# Segmentação de voz humana em áudio utilizando uma variação da fragmentação baseada em modelos
-**Projeto Final de disciplina Processamento de Sinais Multimídia - 2016.2.**  
-Implementado utilizando a versão 3.6 de Python
+# Multimedia Signal Processing Final Project - 2016.2
+## Voice segmentation on audio using a variation of model-based segmentation.
+
+
